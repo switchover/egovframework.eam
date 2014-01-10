@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/oxm
+		http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+
+	<!--To enable @RequestMapping process on type level and method level -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	
+	<!-- bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+           		<ref bean="jsonConverter" />
+           		<ref bean="formConverter" />
+           		<ref bean="xmlConverter" />
+       		</list>
+		</property>
+	</bean-->
+	
+	<bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes" value="application/json" />
+	</bean>
+	
+	<bean id="formConverter" class="org.springframework.http.converter.FormHttpMessageConverter" />
+	
+	<bean id="xmlConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+		<constructor-arg ref="marshaller" />
+		<property name="supportedMediaTypes" value="application/xml" />
+	</bean>
+
+	<oxm:jaxb2-marshaller id="marshaller">
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.user.UserInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.user.UserInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.role.RoleInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.role.RoleInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.role.RoleHierarchyInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.role.RoleHierarchyInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.resource.ResourceInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.resource.ResourceInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.resource.ResourceRoleInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.resource.ResourceRoleInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.authority.AuthorityInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.authority.AuthorityInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.system.SystemDataInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.system.SystemDataInfoList" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.session.SessionDataInfo" />
+		<oxm:class-to-be-bound name="egovframework.eam.admin.api.session.SessionDataInfoList" />		
+	</oxm:jaxb2-marshaller>
+
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="0" />
+	</bean>
+
+	<bean id="xml"
+		class="org.springframework.web.servlet.view.xml.MarshallingView">
+		<constructor-arg ref="marshaller" />
+		
+		<property name="contentType" value="application/xml;charset=UTF-8" />
+	</bean>
+	<!--
+	<bean id="users" class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+		<property name="prefixJson" value="false" />
+	</bean>
+	-->
+
+	<!--
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				<entry key="xml" value="application/xml" />
+				<entry key="html" value="text/html" />
+			</map>
+		</property>
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" />
+				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+					<property name="prefix" value="/WEB-INF/jsp/" />
+					<property name="suffix" value=".jsp" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	-->
+</beans>

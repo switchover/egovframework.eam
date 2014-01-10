@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    
+	<!-- Remote Service -->
+	<bean id="remoteService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+    	<!-- property name="serviceUrl" value="rmi://127.0.0.1:1099/RemoteService" /-->
+    	<property name="serviceUrl" ref="adminServerConfig" />
+    	<property name="serviceInterface" value="egovframework.eam.api.internal.RemoteService" />
+    	
+    	<property name="refreshStubOnConnectFailure" value="true" />
+    	<property name="cacheStub" value="false" />
+    	<property name="lookupStubOnStartup" value="false" />
+	</bean>
+	
+	<bean id="adminServerConfig" class="egovframework.eam.api.config.AdminServerFactoryBean" />
+	
+	<!-- Cryptography Service -->
+	<bean id="passwordEncoder" class="egovframework.rte.fdl.cryptography.EgovPasswordEncoder">
+		<property name="algorithm" value="SHA-256" />	<!-- default : SHA-256 -->
+		<property name="hashedPassword" ref="authKeyConfig" />
+	</bean>
+	
+	<bean id="password" class="java.lang.String">
+		<constructor-arg ref="passwordConfig" />
+	</bean>
+	
+	<bean id="passwordConfig" class="egovframework.eam.api.config.SystemInfoStringFactoryBean">
+		<property name="propertyName" value="password" />
+	</bean>
+	
+	<bean id="authKeyConfig" class="egovframework.eam.api.config.SystemInfoStringFactoryBean">
+		<property name="propertyName" value="authKey" />
+	</bean>
+	
+	<bean id="cryptoService" class="egovframework.rte.fdl.cryptography.impl.EgovGeneralCryptoServiceImpl">
+		<property name="passwordEncoder" ref="passwordEncoder" />
+		<property name="algorithm" value="PBEWithSHA1AndDESede" />	<!-- default : PBEWithSHA1AndDESede -->
+		<property name="blockSize" value="1024" />	<!-- default : 1024 -->
+	</bean>
+	
+	<!-- System Service -->
+	<bean id="systemService" class="egovframework.eam.api.system.impl.SystemServiceImpl" />
+
+</beans>

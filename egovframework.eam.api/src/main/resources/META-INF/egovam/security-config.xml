@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security-2.0.4.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+    
+    <context:annotation-config />
+    
+    <!--
+    <http access-denied-page="/common/accessDenied.jsp" lowercase-comparisons="false">
+		<form-login login-page="/common/login.jsp"
+					authentication-failure-url="/common/login.jsp?fail=true" />
+		<logout logout-success-url="/common/logout.jsp" />
+		<anonymous/>
+	</http>
+	-->
+
+	<http lowercase-comparisons="false">
+		<form-login />
+		<logout />
+		<anonymous />
+	</http>
+	
+	<authentication-provider user-service-ref="jdbcUserService">
+		<password-encoder hash="sha-256" />
+	</authentication-provider>
+	
+	<!--
+	<jdbc-user-service id="jdbcUserService" data-source-ref="dataSource"
+		users-by-username-query="SELECT USER_ID, PASSWORD, ENABLED, BIRTHDAY FROM USERS WHERE USER_ID = ?"
+		authorities-by-username-query="SELECT USER_ID, AUTHORITY FROM AUTHORITIES WHERE USER_ID = ?" />
+	-->
+	
+	<!-- customizing user table, authorities table -->	 
+	<beans:bean id="jdbcUserService"
+			class="egovframework.rte.fdl.security.userdetails.jdbc.EgovJdbcUserDetailsManager" >
+		<beans:property name="usersByUsernameQuery" ref="usersQueryFactoryBean" />
+		<beans:property name="authoritiesByUsernameQuery" ref="authoritiesQueryFactoryBean" />
+		<beans:property name="roleHierarchy" ref="roleHierarchy" />
+		<beans:property name="dataSource" ref="dataSourceFactoryBean" />
+		<beans:property name="mapClass" value="egovframework.eam.api.user.DefaultUserDetailsMapping" />
+	</beans:bean>
+	
+	<beans:bean id="dataSourceFactoryBean" class="egovframework.eam.api.config.DataSourceFactoryBean" />
+	
+	<beans:bean id="usersQueryFactoryBean" class="egovframework.eam.api.config.UsersQueryFactoryBean">
+		<beans:property name="defaultQuery" value="SELECT USER_ID, PASSWORD, ENABLED, USERS.* FROM USERS WHERE USER_ID = ?" />
+	</beans:bean>
+	
+	<beans:bean id="authoritiesQueryFactoryBean" class="egovframework.eam.api.config.AuthoritiesQueryFactoryBean">
+		<beans:property name="defaultQuery" value="SELECT USER_ID, AUTHORITY FROM AUTHORITIES WHERE USER_ID = ?" />
+	</beans:bean>
+	
+	<beans:bean id="mapClassFactoryBean" class="egovframework.eam.api.config.MapClassFactoryBean">
+		<beans:property name="defaultMapClass" value="egovframework.eam.api.user.DefaultUserDetailsMapping" />
+	</beans:bean>
+	
+	<beans:bean id="securedObjectService"
+		class="egovframework.rte.fdl.security.securedobject.impl.SecuredObjectServiceImpl">
+		<beans:property name="securedObjectDAO" ref="securedObjectDAO"/>
+	</beans:bean>
+
+	<beans:bean id="securedObjectDAO" class="egovframework.rte.fdl.security.securedobject.impl.SecuredObjectDAO" >
+		<beans:property name="dataSource" ref="dataSource"/>
+	</beans:bean>
+	
+	<beans:bean id="roleHierarchy" 
+			class="org.springframework.security.userdetails.hierarchicalroles.RoleHierarchyImpl" >
+		<!-- XML 사용 
+		<beans:property name="hierarchy">
+			<beans:value>
+				ROLE_ADMIN > ROLE_USER
+				ROLE_USER > ROLE_RESTRICTED
+				ROLE_RESTRICTED > IS_AUTHENTICATED_FULLY
+				IS_AUTHENTICATED_REMEMBERED > IS_AUTHENTICATED_ANONYMOUSLY
+			</beans:value>
+		</beans:property>
+		-->
+		<!-- DB 사용 -->
+		<beans:property name="hierarchy" ref="hierarchyStrings"/>
+	</beans:bean>
+
+	<beans:bean id="hierarchyStrings"
+		class="egovframework.rte.fdl.security.userdetails.hierarchicalroles.HierarchyStringsFactoryBean"
+		init-method="init">
+		<beans:property name="securedObjectService" ref="securedObjectService"/>
+	</beans:bean>
+	
+	<beans:bean id="filterSecurityInterceptor"
+		class="org.springframework.security.intercept.web.FilterSecurityInterceptor">
+		<custom-filter before="FILTER_SECURITY_INTERCEPTOR" />
+		<beans:property name="authenticationManager" ref="_authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="_accessManager" />
+		<beans:property name="objectDefinitionSource" ref="databaseObjectDefinitionSource" />
+	</beans:bean>
+	
+	<beans:bean id="databaseObjectDefinitionSource"
+		class="org.springframework.security.intercept.web.EgovReloadableDefaultFilterInvocationDefinitionSource">
+		<beans:constructor-arg ref="antUrlPathMatcher" />
+		<!--beans:constructor-arg ref="regexUrlPathMatcher" /-->
+		<beans:constructor-arg ref="requestMap" />		
+		<beans:property name="securedObjectService" ref="securedObjectService"/>
+	</beans:bean>
+
+	<!--  url  -->
+	<beans:bean id="requestMap"
+		class="egovframework.rte.fdl.security.intercept.ResourcesMapFactoryBean"
+		init-method="init">
+		<beans:property name="securedObjectService" ref="securedObjectService"/>
+		<beans:property name="resourceType" value="url"/>
+	</beans:bean>
+	
+	<beans:bean id="antUrlPathMatcher" class="org.springframework.security.util.AntUrlPathMatcher" />
+	<beans:bean id="regexUrlPathMatcher" class="org.springframework.security.util.RegexUrlPathMatcher" />
+	
+	<!-- method -->
+	<beans:bean id="methodDefinitionSourceAdvisor" class="org.springframework.security.intercept.method.aopalliance.MethodDefinitionSourceAdvisor">
+		<beans:constructor-arg value="methodSecurityInterceptor" />
+		<beans:constructor-arg ref="delegatingMethodDefinitionSource" />
+	</beans:bean>
+	
+	<beans:bean id="methodSecurityInterceptor" class="org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor">
+		<beans:property name="validateConfigAttributes" value="false" />
+		<beans:property name="authenticationManager" ref="_authenticationManager"/>
+		<beans:property name="accessDecisionManager" ref="_accessManager"/>
+		<beans:property name="objectDefinitionSource" ref="delegatingMethodDefinitionSource" />
+	</beans:bean>
+
+	<beans:bean id="delegatingMethodDefinitionSource" class="org.springframework.security.intercept.method.DelegatingMethodDefinitionSource">
+		<beans:property name="methodDefinitionSources">
+			<beans:list>
+				<beans:ref bean="methodDefinitionSources"/>
+				<beans:bean class="org.springframework.security.annotation.SecuredMethodDefinitionSource" />
+				<beans:bean class="org.springframework.security.annotation.Jsr250MethodDefinitionSource" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+	
+	<beans:bean id="methodDefinitionSources"
+		class="org.springframework.security.intercept.method.MapBasedMethodDefinitionSource">
+		<beans:constructor-arg ref="methodMap" />
+	</beans:bean>
+	
+	<beans:bean id="methodMap"
+		class="egovframework.rte.fdl.security.intercept.ResourcesMapFactoryBean"
+		init-method="init">
+		<beans:property name="securedObjectService" ref="securedObjectService"/>
+		<beans:property name="resourceType" value="method"/>
+	</beans:bean>
+	
+	<!-- pointcut -->
+	<!-- if no map, there is a error that "this map must not be empty; it must contain at least one entry" -->
+	<!--
+	<beans:bean id="protectPointcutPostProcessor" class="org.springframework.security.intercept.method.ProtectPointcutPostProcessor">
+		<beans:constructor-arg ref="methodDefinitionSources" />
+		<beans:property name="pointcutMap" ref="pointcutMap"/>
+	</beans:bean>
+
+	<beans:bean id="pointcutMap"
+		class="egovframework.rte.fdl.security.intercept.ResourcesMapFactoryBean"
+		init-method="init">
+		<beans:property name="securedObjectService" ref="securedObjectService"/>
+		<beans:property name="resourceType" value="pointcut"/>
+	</beans:bean>
+	-->
+	
+	<!-- logout handler -->
+	<!-- 
+	<beans:bean id="logoutFilter" class="org.springframework.security.ui.logout.LogoutFilter">
+        <custom-filter position="LOGOUT_FILTER"/>
+        <beans:constructor-arg index="0" value="/"/>
+        <beans:constructor-arg index="1">
+            <beans:list>
+                <beans:ref bean="securityContextLogoutHandler"/>
+                <beans:ref bean="logoutHandler"/>
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean>
+
+    <beans:bean id="securityContextLogoutHandler" class="org.springframework.security.ui.logout.SecurityContextLogoutHandler" />
+	-->
+    
+</beans:beans>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	
+	<import resource="classpath*:META-INF/egovam/security-*.xml" />
+	
+	<bean id="eGovAMConfig" class="egovframework.eam.api.config.SecurityConfig">
+		<property name="accessDeniedUrl" value="/common/accessDenied.jsp" />
+		<property name="loginUrl" value="/common/login.jsp" />
+		<property name="logoutSuccessUrl" value="/common/logout.jsp" />
+		<property name="loginFailureUrl" value="/common/login.jsp?fail=true" />
+		
+		<!--
+		<property name="dataSource" ref="dataSource" />
+		<property name="jdbcUsersByUsernameQuery" value="SELECT USER_ID, PASSWORD, ENABLED, USERS.* FROM USERS WHERE USER_ID = ?" />
+		<property name="jdbcAuthoritiesByUsernameQuery" value="SELECT USER_ID, AUTHORITY FROM AUTHORITIES WHERE USER_ID = ?" />
+		<property name="jdbcMapClass" value="egovframework.eam.api.user.DefaultUserDetailsMapping" />
+		-->
+	</bean>
+	
+	<!-- for System info. settings -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:egovframework/system.properties" />
+		<!-- property name="location" value="file:/home/egov/properties/system.properties" /-->
+		
+	</bean>
+	
+	<bean id="systemInfo" class="egovframework.eam.api.config.SystemInfoConfig">
+		<property name="systemId" value="${system.systemId}" />
+		<property name="authKey" value="${system.authKey}" />
+		<property name="password" value="${system.password}" />
+		
+		<!--
+		<property name="adminServerIp" value="127.0.0.1" />
+		<property name="adminServerPort" value="1099" />
+		
+		<property name="skipOnRemoteError" value="true" />
+		-->
+	</bean>
+
+</beans>

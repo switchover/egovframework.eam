@@ -1,0 +1,24 @@
+<module>
+	<inherits name="com.google.gwt.user.User"/>
+	<!-- inherits name="com.google.gwt.user.theme.standard.Standard"/-->
+	
+	<inherits name="com.google.gwt.core.Core"/>
+    <inherits name="com.google.gwt.user.History"/>
+    
+    <inherits name="com.smartgwt.SmartGwtNoScript"/>
+    
+    <inherits name="com.smartgwt.tools.SmartGwtTools"/>
+    
+    <!-- inherits name="com.smartgwt.SmartGwt"/-->
+    
+    <inherits name="com.smartclient.theme.enterpriseblue.EnterpriseBlueResources"/>
+   	<inherits name="com.smartclient.theme.enterprise.EnterpriseResources"/>
+    <inherits name="com.smartclient.theme.graphite.GraphiteResources"/>
+    <inherits name="com.smartclient.theme.simplicity.SimplicityResources"/>
+	
+	<entry-point class="egovframework.eam.admin.main.client.Main"/>
+	
+	<!-- Specify the paths for translatable code -->
+	<source path='client' />
+	<source path='shared' />
+</module>

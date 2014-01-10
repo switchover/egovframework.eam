@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    
+    <!-- SSO Service -->
+	<bean id="SSOService" class="egovframework.eam.api.sso.impl.SSOServiceImpl" />
+	
+	<!-- SSO Helper -->
+	<bean id="defaultSSOHelper" class="egovframework.eam.api.sso.DefaultSSOHelper" />
+		
+</beans>

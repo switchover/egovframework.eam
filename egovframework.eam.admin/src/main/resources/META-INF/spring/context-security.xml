@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+    
+    <http access-denied-page="/common/accessDenied.jsp" lowercase-comparisons="false">
+    	<intercept-url pattern="/common/**" filters="none" />
+    	<intercept-url pattern="/css/**" filters="none" />
+    	<intercept-url pattern="/images/**" filters="none" />
+    	<intercept-url pattern="/**/*.css" filters="none" />
+    	<intercept-url pattern="/**/sc/**" filters="none" />
+    	<intercept-url pattern="/favicon.ico" filters="none" />
+    	<intercept-url pattern="/index.jsp" filters="none" />
+
+		<!-- for test comment this intercept-url -->
+		<!-- -->
+        <intercept-url pattern="/**" access="ROLE_USER" />
+        <intercept-url pattern="/Main.html*" access="ROLE_USER" />
+        <!-- -->
+
+		<form-login 
+			login-page="/common/login.jsp"
+			authentication-failure-url="/common/login.jsp?fail=true"
+			/>
+			<!--
+			default-target-url="/Main.html" 
+			always-use-default-target='true' /-->
+		
+		<logout logout-success-url="/index.jsp" />
+		<anonymous/>
+	</http>
+	
+	<authentication-provider user-service-ref="jdbcUserService">
+		<password-encoder hash="sha-256" />
+	</authentication-provider>
+	
+	<jdbc-user-service id="jdbcUserService" data-source-ref="dataSource"
+		users-by-username-query="SELECT USER_ID, PASSWORD, ENABLED, USER_NAME FROM EGOVAM_USERS WHERE USER_ID = ?"
+		authorities-by-username-query="SELECT USER_ID, AUTHORITY FROM EGOVAM_AUTHORITIES WHERE USER_ID = ?" />
+	
+</beans:beans>

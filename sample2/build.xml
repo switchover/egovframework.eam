@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="build" default="copy">
+	<property name="repository" value="${user.home}/.m2/repository" />
+	<property name="eam.version" value="1.0.0" />
+	
+	<target name="copy">
+    	<copy
+    		file="${repository}/egovframework/eam/api/${eam.version}/api-${eam.version}.jar" 
+			todir="${basedir}/WebContent/WEB-INF/lib/" /> 	
+	</target>
+</project>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<sqlMap resource="egovframework/sqlmap/rte/sample/EgovSample_Sample_SQL.xml"/>
+    <!-- <sqlMap resource="egovframework/sqlmap/rte/sample/EgovSample_Sample_SQL_mysql.xml"/> -->
+    <!-- <sqlMap resource="egovframework/sqlmap/rte/sample/EgovSample_Sample_SQL_oracle.xml"/> -->
+</sqlMapConfig>

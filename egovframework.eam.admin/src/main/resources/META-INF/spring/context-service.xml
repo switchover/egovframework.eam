@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- TODO port DB 설정으로 분리.. -->	
+	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="serviceName" value="RemoteService" />
+		<property name="service" ref="remoteService" />
+		<property name="serviceInterface" value="egovframework.eam.api.internal.RemoteService" />
+		<!-- defaults to 1099 -->
+		<property name="registryPort" value="${rmi.lookup.port}" />
+		<property name="servicePort" value="${rmi.service.port}" />
+	</bean>
+	
+	<!-- TODO port DB 설정으로 분리.. -->	
+	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="serviceName" value="SSOLoginCheck" />
+		<property name="service" ref="ssoLogicCheck" />
+		<property name="serviceInterface" value="egovframework.eam.api.sso.client.SSOLoginCheck" />
+		<!-- defaults to 1099 -->
+		<property name="registryPort" value="${rmi.lookup.port}" />
+		<property name="servicePort" value="${rmi.service.port}" />
+	</bean>
+	
+</beans>

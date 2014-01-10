@@ -1,0 +1,100 @@
+create table users (
+	user_id varchar(20) not null,
+	password varchar(255) not null,
+	enabled boolean not null,
+	user_name varchar(50) not null,
+	primary key(user_id)
+);
+
+create table roles (
+	authority varchar(50) not null primary key,
+	role_name varchar(50) not null
+);
+
+create table authorities (
+	user_id varchar(20) not null,
+	authority varchar(50) not null,
+	primary key(user_id, authority),
+	foreign key(user_id) references users(user_id),
+	foreign key(authority) references roles(authority)
+);
+
+create table roles_hierarchy (
+	parent_role varchar(50) not null,
+	child_role varchar(50) not null,
+	primary key(parent_role, child_role),
+	foreign key(parent_role) references roles(authority),
+	foreign key(child_role) references roles(authority)
+);
+
+create table secured_resources (
+	resource_id varchar(10) not null primary key,
+	resource_name varchar(50),
+	resource_pattern varchar(100) not null,
+	resource_type varchar(10),
+	sort_order integer
+);
+
+create table secured_resources_role (
+	resource_id varchar(10) not null,
+	authority varchar(50) not null,
+	primary key(resource_id, authority),
+	foreign key(resource_id) references secured_resources(resource_id),
+	foreign key(authority) references roles(authority)
+);
+
+------------------------------
+
+Insert into USERS (USER_ID,USER_NAME,PASSWORD,ENABLED) values ('admin','Admin.','8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',true);
+Insert into USERS (USER_ID,USER_NAME,PASSWORD,ENABLED) values ('user','User','04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',true);
+-- admin/admin
+-- user/user
+
+Insert into ROLES (AUTHORITY,ROLE_NAME) values ('ROLE_ADMIN','Administrator Role');
+Insert into ROLES (AUTHORITY,ROLE_NAME) values ('ROLE_USER','Public user');
+Insert into ROLES (AUTHORITY,ROLE_NAME) values ('ROLE_RESTRICTED','Restricted user');
+
+Insert into AUTHORITIES (USER_ID,AUTHORITY) values ('admin','ROLE_ADMIN');
+Insert into AUTHORITIES (USER_ID,AUTHORITY) values ('user','ROLE_USER');
+
+Insert into ROLES_HIERARCHY (PARENT_ROLE,CHILD_ROLE) values ('ROLE_RESTRICTED','ROLE_USER');
+Insert into ROLES_HIERARCHY (PARENT_ROLE,CHILD_ROLE) values ('ROLE_USER','ROLE_ADMIN');
+
+Insert into SECURED_RESOURCES (RESOURCE_ID,RESOURCE_NAME,RESOURCE_PATTERN,RESOURCE_TYPE,SORT_ORDER) 
+values ('WEB-000001','Sample Add','/sample/add*','url',1);
+Insert into SECURED_RESOURCES (RESOURCE_ID,RESOURCE_NAME,RESOURCE_PATTERN,RESOURCE_TYPE,SORT_ORDER) 
+values ('WEB-000002','Sample Update','/sample/update*','url',1);
+Insert into SECURED_RESOURCES (RESOURCE_ID,RESOURCE_NAME,RESOURCE_PATTERN,RESOURCE_TYPE,SORT_ORDER) 
+values ('WEB-000003','Sample Delete','/sample/delete*','url',1);
+Insert into SECURED_RESOURCES (RESOURCE_ID,RESOURCE_NAME,RESOURCE_PATTERN,RESOURCE_TYPE,SORT_ORDER) 
+values ('WEB-000004','Sample Select','/sample/egov*','url',2);
+
+Insert into SECURED_RESOURCES_ROLE (RESOURCE_ID,AUTHORITY) values ('WEB-000001','ROLE_ADMIN');
+Insert into SECURED_RESOURCES_ROLE (RESOURCE_ID,AUTHORITY) values ('WEB-000002','ROLE_ADMIN');
+Insert into SECURED_RESOURCES_ROLE (RESOURCE_ID,AUTHORITY) values ('WEB-000003','ROLE_ADMIN');
+Insert into SECURED_RESOURCES_ROLE (RESOURCE_ID,AUTHORITY) values ('WEB-000004','ROLE_USER');
+
+-- method security
+
+Insert into SECURED_RESOURCES (RESOURCE_ID,RESOURCE_NAME,RESOURCE_PATTERN,RESOURCE_TYPE,SORT_ORDER) 
+values ('MTD-000001','Sample Select','egovframework.rte.sample.service.EgovSampleService.selectSampleListTotCnt','method',1);
+
+--Insert into SECURED_RESOURCES_ROLE (RESOURCE_ID,AUTHORITY) values ('MTD-000001','ROLE_USER');
+
+commit;
+
+------------------------------------------------------------------
+create table groups (
+	group_id varchar(20) not null,
+	group_name varchar(50) not null,
+	primary key(group_id)
+);
+
+create table groups_users (
+	group_id varchar(20) not null,
+	user_id varchar(20) not null,
+	primary key(group_id, user_id),
+	foreign key(group_id) references groups(group_id)
+	foreign key(user_id) references users(user_id)
+);
+
